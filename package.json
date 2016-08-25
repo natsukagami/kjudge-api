@@ -9,7 +9,7 @@
     "build": "(tsc -p src/ || true) && gulp",
     "test": "mocha build/test --require source-map-support/register || true",
     "clean": "rimraf build",
-    "start": "node build/app/app.js"
+    "start": "node build/app/bin/www"
   },
   "repository": {
     "type": "git",
@@ -33,7 +33,13 @@
   },
   "dependencies": {
     "bluebird": "^3.4.1",
+    "body-parser": "^1.15.2",
+    "cookie-parser": "^1.4.3",
     "express": "^4.14.0",
-    "source-map-support": "^0.4.2"
+    "fs-extra": "^0.30.0",
+    "morgan": "^1.7.0",
+    "pug": "^2.0.0-beta5",
+    "source-map-support": "^0.4.2",
+    "temp": "^0.8.3"
   }
 }

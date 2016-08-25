@@ -2,10 +2,13 @@
  * Defines scorers that will score the submission based on the problem types
  */
 
-import { Test } from './test'
-import { Result, Verdict } from './result'
+import { Test } from '../Problem/test'
+import { Result, Verdict } from '../Submission/result'
 
 export type ScorerType = 'single' | 'subtaskMin' | 'subtaskMul'; // Defined by scorers 
+export function checkScorerType(s: any): s is ScorerType {
+	return s === 'single' || s === 'subtaskMin' || s === 'subtaskMul';
+}
 
 export interface ScorerInterface {
 	score(testSuite: Array<Test>, testResults: Array<Result>): number;
@@ -13,7 +16,7 @@ export interface ScorerInterface {
 
 /** Basic scorers */
 
-export class SingleScorer implements ScorerInterface {
+class SingleScorer implements ScorerInterface {
 	score(testSuite: Array<Test>, testResults: Array<Result>): number {
 		let totalScore: number = 0;
 		if (testSuite.length !== testResults.length) {
@@ -26,7 +29,7 @@ export class SingleScorer implements ScorerInterface {
 	}
 }
 
-export class SubtaskMinScorer implements ScorerInterface {
+class SubtaskMinScorer implements ScorerInterface {
 	score(testSuite: Array<Test>, testResults: Array<Result>): number {
 		let totalScore: number = 0;
 		let subtaskScores: Array<number> = [], subtaskResults: Array<number> = [];
@@ -49,7 +52,7 @@ export class SubtaskMinScorer implements ScorerInterface {
 	}
 }
 
-export class SubtaskMulScorer implements ScorerInterface {
+class SubtaskMulScorer implements ScorerInterface {
 	score(testSuite: Array<Test>, testResults: Array<Result>): number {
 		let totalScore: number = 0;
 		let subtaskScores: Array<number> = [], subtaskResults: Array<number> = [];
