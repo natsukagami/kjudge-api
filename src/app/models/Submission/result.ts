@@ -28,12 +28,13 @@ export interface ResultInterface {
 	runningTime: number,
 	memoryUsed: number,
 	verdict: Verdict,
-	score: number;
+	ratio: number;
+	message?: string;
 }
 
 export class Result implements ResultInterface {
 	constructor(public testId: number, public runningTime: number, public memoryUsed: number,
-		public verdict: Verdict, public score: number) {
+		public verdict: Verdict, public ratio: number, public message: string = "") {
 
 	}
 } 

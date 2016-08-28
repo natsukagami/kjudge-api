@@ -8,8 +8,14 @@ import { SubmitType, getCompiler, CompilerInterface } from '../Compiler/compiler
 import { TestInterface } from '../Problem/test'
 import { ResultInterface, Result } from './result'
 import { getRunner, RunnerInterface } from '../Runner/runner'
+import { ConcurrentQueue } from '../Queue/queue'
 import * as temp from 'temp'
 import * as Promise from 'bluebird'
+import jsonminify = require('jsonminify');
+import * as fs from 'fs';
+import * as path from 'path';
+
+const SETTINGS: any = JSON.parse(jsonminify(fs.readFileSync(path.join(__dirname, '../../bin/config.json'), 'utf-8')));
 
 temp.track();
 // Let's build for temp an async function, since we can't promisify it in TS :( 
@@ -34,6 +40,8 @@ export interface SubmissionInterface {
 	judge(): Promise<void>;
 }
 
+export let Queue = new ConcurrentQueue(SETTINGS.tests_concurrency);
+
 export class Submission implements SubmissionInterface {
 	language: LanguageInterface; 
 	result: Array<Result> = [];
@@ -46,11 +54,11 @@ export class Submission implements SubmissionInterface {
 		this.compiler = getCompiler(this.problem.submitType, this.language);
 	}
 	judge(): Promise<void> {
-		let ret = this.compiler.compile(this.folder, this.code, this.problem.header, this.problem.grader).then((file) => {
+		let ret = this.compiler.compile(this.folder, this.code, this.problem.compare, this.problem.header, this.problem.grader).then((file) => {
 			return Promise.map<TestInterface, Result>(this.problem.tests, (item) => {
 				let runner: RunnerInterface = getRunner();
 				return this.folder.then((dir) => {
-					return runner.run(dir, item);
+					return Queue.push(dir, item, (this.problem.compare === ""));
 				})
 			})
 		})

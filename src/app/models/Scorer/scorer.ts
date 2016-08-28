@@ -23,7 +23,7 @@ class SingleScorer implements ScorerInterface {
 			throw new Error('Number of tests and results do not match'); // Should never happen
 		}
 		for (let i: number = 0; i < testSuite.length; ++i) {
-			if (testResults[i].verdict === Verdict.Accepted) totalScore += testSuite[i].score;
+			totalScore += testResults[i].ratio * testSuite[i].score;
 		}
 		return totalScore;
 	}
@@ -43,7 +43,7 @@ class SubtaskMinScorer implements ScorerInterface {
 				subtaskScores.push(0);
 			}
 			subtaskScores[test.group] += test.score;
-			subtaskResults[test.group] = Math.min(subtaskResults[test.group], res.score);
+			subtaskResults[test.group] = Math.min(subtaskResults[test.group], res.ratio);
 		}
 		for (let i: number = 0; i < subtaskResults.length; ++i) {
 			totalScore += subtaskResults[i] * subtaskScores[i];
@@ -66,7 +66,7 @@ class SubtaskMulScorer implements ScorerInterface {
 				subtaskScores.push(0);
 			}
 			subtaskScores[test.group] += test.score;
-			subtaskResults[test.group] *= res.score;
+			subtaskResults[test.group] *= res.ratio;
 		}
 		for (let i: number = 0; i < subtaskResults.length; ++i) {
 			totalScore += subtaskResults[i] * subtaskScores[i];

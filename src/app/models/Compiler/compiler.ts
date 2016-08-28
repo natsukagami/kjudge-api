@@ -15,19 +15,26 @@ export interface CompilerInterface {
 	/**
 	 * From sent code, compile it and return the executable file path 
 	 */
-	compile(folder: Promise<string>, code: string, header?: string, grader?: string): Promise<string>;
+	compile(folder: Promise<string>, code: string, compare?: string, header?: string, grader?: string): Promise<string>;
 }
 
 class SingleCompiler implements CompilerInterface {
 	constructor(public language: LanguageInterface) {
 
 	}
-	compile(folder: Promise<string>, code: string): Promise<string> {
+	compile(folder: Promise<string>, code: string, compare: string = ""): Promise<string> {
 		return folder.then((dir) => {
-			return writeFileAsync(path.join(dir, 'code' + this.language.extName), code)
+			return Promise.all([
+				writeFileAsync(path.join(dir, 'code' + this.language.extName), code),
+				(compare === "" ? Promise.resolve(null) : writeFileAsync(path.join(dir, 'compare' + this.language.extName), compare))
+			])
 				.then(() => {
-					return runProcess(this.language.program.compile, dir);
-				}).then((proc) => { 
+					return Promise.all([
+						runProcess(this.language.program.compile, dir),
+						(compare === "" ? Promise.resolve(null) : runProcess(this.language.program.compile.replace(/code/g, "compare"), dir))
+					]);
+				}).then((procs) => { 
+					let proc = procs[0];
 					if (proc.returnCode === 0) return dir;
 					return Promise.reject(new Error('Compile Error: ' + proc.stderr));
 				}); 
@@ -39,15 +46,20 @@ class LibraryCompiler implements CompilerInterface {
 	constructor(public language: LanguageInterface) {
 
 	}
-	compile(folder: Promise<string>, code: string, header: string, grader: string): Promise<string> {
+	compile(folder: Promise<string>, code: string, compare: string = "", header: string, grader: string): Promise<string> {
 		return folder.then((dir) => {
 			return Promise.all([
 				writeFileAsync(path.join(dir, 'grader' + this.language.hdrName), header),
 				writeFileAsync(path.join(dir, 'code' + this.language.extName), code),
-				writeFileAsync(path.join(dir, 'grader' + this.language.extName), grader)
+				writeFileAsync(path.join(dir, 'grader' + this.language.extName), grader),
+				(compare === "" ? Promise.resolve(null) : writeFileAsync(path.join(dir, 'compare' + this.language.extName), compare))
 			]).then(() => {
-				return runProcess(this.language.library.compile, dir);
-			}).then((proc) => { 
+					return Promise.all([
+						runProcess(this.language.library.compile, dir),
+						(compare === "" ? Promise.resolve(null) : runProcess(this.language.program.compile.replace(/code/g, "compare"), dir))
+					]);
+				}).then((procs) => { 
+				let proc = procs[0];
 				if (proc.returnCode === 0) return dir;
 				return Promise.reject(new Error('Compile Error: ' + proc.stderr));
 			}); 

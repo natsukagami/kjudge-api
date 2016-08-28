@@ -6,7 +6,6 @@ import morgan = require('morgan');
 import path = require('path');
 import bodyParser = require('body-parser');
 import cookieParser = require('cookie-parser');
-import { SubmissionQueue } from './models/Queue/queue';
 
 let app = express();
 
@@ -29,12 +28,9 @@ app.use(cookieParser());
 /** Static files */
 app.use(express.static(path.join(__dirname, 'public')));
 
-let Queue = new SubmissionQueue();
-
 /** Local variables */
-app.use((req: express.Request, res, next: Function) => {
+app.use((req: express.Request, res: express.Response, next: Function) => {
 	if (app.get('env') === 'development') res.locals.pretty = true;
-	res.queue = Queue;
 	next();
 });
 

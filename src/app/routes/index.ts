@@ -48,20 +48,20 @@ let router = express.Router();
 		 ]
  * }
  */
-router.post('/submit', (req, res, next) => {
+router.post('/submit', (req, res: express.Response, next) => {
 	let body = req.body;
 	let submitType = body.problem.submitType;
 	let scorerType = body.problem.scorerType;
 	if (!checkSubmitType(submitType) || !checkScorerType(scorerType)) {
 		res.json("Wrong problem format");
 	}
-	let problem = new Problem(body.problem.name, submitType, scorerType, body.problem.header, body.problem.grader);
+	let problem = new Problem(body.problem.name, submitType, scorerType, body.problem.compare, body.problem.header, body.problem.grader);
 	body.problem.tests.forEach((item) => {
 		let test = new Test(item.id, item.inputFile, item.outputFile, item.timeLimit, item.memoryLimit, item.score, item.group);
 		problem.pushTest(test);
 	});
 	let submission = new Submission(body.submission.id, problem, body.submission.language, body.submission.code);
-	res.queue.push(submission).then(() => {
+	submission.judge().then(() => {
 		res.json({
 			id: submission.id,
 			score: submission.score,

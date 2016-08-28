@@ -4,7 +4,9 @@ import * as path from 'path'
 import * as fs from 'fs-extra'
 import { runProcess } from '../Process/process'
 import { Verdict } from '../Submission/result'
+import jsonminify = require('jsonminify');
 
+const SETTINGS: any = JSON.parse(jsonminify(fs.readFileSync(path.join(__dirname, '../../bin/config.json'), 'utf-8')));
 
 export class ExecutionResult {
 	constructor(public verdict: Verdict, public time: number, public memory: number, public outputFile: string) { 
@@ -31,7 +33,7 @@ export interface SandboxInterface {
 
 class IsolateSandbox implements SandboxInterface {
 	static Pool = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-	static Path = '/var/lib/isolate'
+	static Path = SETTINGS.isolate_path;
 	pool: number = -1;
 	boxFolder: string;
 	constructor(public folder: string, public inputFile: string) {
@@ -43,8 +45,8 @@ class IsolateSandbox implements SandboxInterface {
 	getPool(): Promise<number> {
 		if (this.pool !== -1) return Promise.resolve(this.pool);
 		return new Promise<number>((resolve, reject) => {
-			console.log(IsolateSandbox.Pool.length);
 			if (IsolateSandbox.Pool.length > 0) {
+				console.log(`Pool ${this.pool} => ${IsolateSandbox.Pool[0]}`);
 				resolve(this.pool = IsolateSandbox.Pool.shift());
 			}
 			resolve(Promise.delay(500).then(() => {
@@ -53,6 +55,7 @@ class IsolateSandbox implements SandboxInterface {
 		});
 	}
 	prepare(): Promise<void> {
+		console.log('Prepare called');
 		return this.getPool().then(() => {
 			console.log(`Pool = ${this.pool}`)
 			/* Init the sandbox */
@@ -98,9 +101,10 @@ class IsolateSandbox implements SandboxInterface {
 		});
 	}
 	cleanup(): Promise<void> {
+		console.log(`Pool ${this.pool} done, cleaning up...`);
 		return runProcess(`isolate --cleanup -b ${this.pool}`).then(() => {
 			IsolateSandbox.Pool.push(this.pool);
-			this.pool = -1;
+			console.log(`Releasing pool #${this.pool}. New pool = ${IsolateSandbox.Pool}`);
 		});
 	}
 }
