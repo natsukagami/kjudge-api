@@ -24,6 +24,7 @@ export class ConcurrentQueue {
 	con: Array<number> = [];
 	Dispatcher: events.EventEmitter = new events.EventEmitter();
 	constructor(public concurrent: number = 1) {
+		this.Dispatcher.emit('empty');
 	}
 	private createJob(q: TestItem): Promise<ResultInterface> {
 		let ret = q.judge();
