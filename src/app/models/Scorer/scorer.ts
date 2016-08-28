@@ -11,13 +11,13 @@ export function checkScorerType(s: any): s is ScorerType {
 }
 
 export interface ScorerInterface {
-	score(testSuite: Array<Test>, testResults: Array<Result>): number;
+	score(testSuite: Array<Test>, testResults: Array<Result>): [number, Array<number>];
 }
 
 /** Basic scorers */
 
 class SingleScorer implements ScorerInterface {
-	score(testSuite: Array<Test>, testResults: Array<Result>): number {
+	score(testSuite: Array<Test>, testResults: Array<Result>): [number, Array<number>] {
 		let totalScore: number = 0;
 		if (testSuite.length !== testResults.length) {
 			throw new Error('Number of tests and results do not match'); // Should never happen
@@ -25,12 +25,12 @@ class SingleScorer implements ScorerInterface {
 		for (let i: number = 0; i < testSuite.length; ++i) {
 			totalScore += testResults[i].ratio * testSuite[i].score;
 		}
-		return totalScore;
+		return [totalScore, [totalScore]];
 	}
 }
 
 class SubtaskMinScorer implements ScorerInterface {
-	score(testSuite: Array<Test>, testResults: Array<Result>): number {
+	score(testSuite: Array<Test>, testResults: Array<Result>): [number, Array<number>] {
 		let totalScore: number = 0;
 		let subtaskScores: Array<number> = [], subtaskResults: Array<number> = [];
 		if (testSuite.length !== testResults.length) {
@@ -45,15 +45,17 @@ class SubtaskMinScorer implements ScorerInterface {
 			subtaskScores[test.group] += test.score;
 			subtaskResults[test.group] = Math.min(subtaskResults[test.group], res.ratio);
 		}
+		let arr: Array<number> = [];
 		for (let i: number = 0; i < subtaskResults.length; ++i) {
 			totalScore += subtaskResults[i] * subtaskScores[i];
+			arr.push(subtaskResults[i] * subtaskScores[i]);
 		}
-		return totalScore;
+		return [totalScore, arr];
 	}
 }
 
 class SubtaskMulScorer implements ScorerInterface {
-	score(testSuite: Array<Test>, testResults: Array<Result>): number {
+	score(testSuite: Array<Test>, testResults: Array<Result>): [number, Array<number>] {
 		let totalScore: number = 0;
 		let subtaskScores: Array<number> = [], subtaskResults: Array<number> = [];
 		if (testSuite.length !== testResults.length) {
@@ -68,10 +70,12 @@ class SubtaskMulScorer implements ScorerInterface {
 			subtaskScores[test.group] += test.score;
 			subtaskResults[test.group] *= res.ratio;
 		}
+		let arr: Array<number> = [];
 		for (let i: number = 0; i < subtaskResults.length; ++i) {
 			totalScore += subtaskResults[i] * subtaskScores[i];
+			arr.push(subtaskResults[i] * subtaskScores[i]);
 		}
-		return totalScore;
+		return [totalScore, arr];
 	}
 }
 

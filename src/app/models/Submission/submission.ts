@@ -36,7 +36,7 @@ export interface SubmissionInterface {
 	compiler: CompilerInterface;
 	folder: Promise<string>;
 	result: Array<ResultInterface>;
-	score: number;
+	score: [number, Array<number>];
 	judge(): Promise<void>;
 }
 
@@ -47,7 +47,7 @@ export class Submission implements SubmissionInterface {
 	result: Array<Result> = [];
 	folder: Promise<string>;
 	compiler: CompilerInterface;
-	score: number = -1;
+	score: [number, Array<number>] = [-1, []];
 	constructor(public id: number, public problem: Problem, language: Language, public code: string) {
 		this.language = getLanguage(language);
 		this.folder = mkdirAsync('submission-');
@@ -68,7 +68,7 @@ export class Submission implements SubmissionInterface {
 		})
 		.catch((err) => {
 			this.result = [];
-			this.score = -1;
+			this.score = [-1, []];
 			});
 		ret.finally(() => {
 			temp.cleanup();
