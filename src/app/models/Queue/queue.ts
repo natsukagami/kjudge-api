@@ -24,7 +24,11 @@ export class ConcurrentQueue {
 	con: Array<number> = [];
 	Dispatcher: events.EventEmitter = new events.EventEmitter();
 	constructor(public concurrent: number = 1) {
-		this.Dispatcher.emit('empty');
+		(function doEmit() {
+			if (this.q.length + this.con.length === 0) this.Dispatcher.emit('empty');
+			else this.Dispatcher.emit('busy');
+			Promise.delay(5000).then(doEmit);
+		})();
 	}
 	private createJob(q: TestItem): Promise<ResultInterface> {
 		let ret = q.judge();
@@ -32,10 +36,7 @@ export class ConcurrentQueue {
 			this.con.splice(this.con.findIndex((value) => {
 				return value === q.id;
 			}), 1);
-			this.startQueue(); 
-			if (this.q.length === 0) {
-				this.Dispatcher.emit('empty');
-			}
+			this.startQueue();
 		});
 		return ret;
 	}
@@ -44,7 +45,6 @@ export class ConcurrentQueue {
 			var a: [TestItem, Function] = this.q.shift();
 			this.con.push(a[0].id);
 			a[1](this.createJob(a[0]));
-			this.Dispatcher.emit('busy');
 		}
 	}
 	push(f: string, t: TestInterface, d: boolean): Promise<ResultInterface> {
