@@ -4,7 +4,7 @@
   "description": "A pluggable API for automated judging systems.",
   "main": "build/models/models.js",
   "scripts": {
-    "postinstall": "cd src && typings install",
+    "postinstall": "cd src && typings install && npm run build",
     "prebuild": "rimraf build",
     "build": "(tsc -p src/ || true) && gulp",
     "test": "mocha build/test --require source-map-support/register || true",
