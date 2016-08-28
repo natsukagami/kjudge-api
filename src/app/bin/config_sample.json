@@ -1,0 +1,11 @@
+/*
+	This file contains configurations for kjudge-api 
+*/ 
+{
+	/* The path where problem test data should be saved. */ 
+	"problems_path": "/home/natsukagami/Projects/ttjudge-discord/problems",
+	/* The path to isolate sandboxes */
+	"isolate_path": "/var/lib/isolate",
+	/* Number of concurrent jobs to be run */
+	"tests_concurrency": 20
+}

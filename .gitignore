@@ -39,3 +39,4 @@ jspm_packages
 /node_modules/
 /build/
 /.vscode/.browse.VC.db*
+/src/app/bin/config.json

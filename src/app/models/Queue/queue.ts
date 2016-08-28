@@ -1,6 +1,7 @@
 
 /// <reference path="../../../typings/index.d.ts" />
 import * as Promise from 'bluebird'
+import events = require('events');
 import { SubmissionInterface } from '../Submission/submission'
 import { ResultInterface } from '../Submission/result'
 import { RunnerInterface, getRunner } from '../Runner/runner'
@@ -21,6 +22,7 @@ class TestItem {
 export class ConcurrentQueue {
 	q: Array<[TestItem, Function]> = [];
 	con: Array<number> = [];
+	Dispatcher: events.EventEmitter = new events.EventEmitter();
 	constructor(public concurrent: number = 1) {
 	}
 	private createJob(q: TestItem): Promise<ResultInterface> {
@@ -30,6 +32,9 @@ export class ConcurrentQueue {
 				return value === q.id;
 			}), 1);
 			this.startQueue(); 
+			if (this.q.length === 0) {
+				this.Dispatcher.emit('empty');
+			}
 		});
 		return ret;
 	}
@@ -38,6 +43,7 @@ export class ConcurrentQueue {
 			var a: [TestItem, Function] = this.q.shift();
 			this.con.push(a[0].id);
 			a[1](this.createJob(a[0]));
+			this.Dispatcher.emit('busy');
 		}
 	}
 	push(f: string, t: TestInterface, d: boolean): Promise<ResultInterface> {
