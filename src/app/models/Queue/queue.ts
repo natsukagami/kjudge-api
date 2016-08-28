@@ -28,7 +28,7 @@ export class ConcurrentQueue {
 			if (this.q.length + this.con.length === 0) this.Dispatcher.emit('empty');
 			else this.Dispatcher.emit('busy');
 			Promise.delay(5000).then(doEmit);
-		});
+		};
 		doEmit();
 	}
 	private createJob(q: TestItem): Promise<ResultInterface> {
