@@ -2,7 +2,7 @@
   "name": "kjudge-api",
   "version": "0.0.0",
   "description": "A pluggable API for automated judging systems.",
-  "main": "build/app/app.js",
+  "main": "build/models/models.js",
   "scripts": {
     "postinstall": "cd src && typings install",
     "prebuild": "rimraf build",
