@@ -24,11 +24,12 @@ export class ConcurrentQueue {
 	con: Array<number> = [];
 	Dispatcher: events.EventEmitter = new events.EventEmitter();
 	constructor(public concurrent: number = 1) {
-		(function doEmit() {
+		let doEmit = () => {
 			if (this.q.length + this.con.length === 0) this.Dispatcher.emit('empty');
 			else this.Dispatcher.emit('busy');
 			Promise.delay(5000).then(doEmit);
-		})();
+		});
+		doEmit();
 	}
 	private createJob(q: TestItem): Promise<ResultInterface> {
 		let ret = q.judge();
