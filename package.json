@@ -2,14 +2,13 @@
   "name": "kjudge-api",
   "version": "0.0.2-0",
   "description": "A pluggable API for automated judging systems.",
-  "main": "build/models/models.js",
+  "main": "build/index.js",
+  "typings": "build/index",
   "scripts": {
-    "postinstall": "cd src && typings install && cd ../ && npm run build",
     "prebuild": "rimraf build",
     "build": "(tsc -p src/ || true) && gulp",
-    "test": "mocha build/test --require source-map-support/register || true",
-    "clean": "rimraf build",
-    "start": "node build/app/bin/www"
+    "test": "npm run build && mocha --recursive build/tests --require source-map-support/register || true",
+    "clean": "rimraf build"
   },
   "repository": {
     "type": "git",
@@ -24,23 +23,22 @@
     "url": "https://github.com/natsukagami/kjudge-api/issues"
   },
   "homepage": "https://github.com/natsukagami/kjudge-api#readme",
-  "devDependencies": {},
-  "dependencies": {
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
     "gulp": "^3.9.1",
     "mocha": "^3.0.2",
     "rimraf": "^2.5.4",
+    "source-map-support": "^0.4.2",
     "typescript": "^1.8.10",
-    "typings": "^1.3.2",
+    "typings": "^1.3.2"
+  },
+  "dependencies": {
     "bluebird": "^3.4.1",
-    "body-parser": "^1.15.2",
-    "cookie-parser": "^1.4.3",
-    "express": "^4.14.0",
     "fs-extra": "^0.30.0",
     "jsonminify": "^0.4.1",
-    "morgan": "^1.7.0",
-    "pug": "^2.0.0-beta5",
     "shell-escape": "^0.2.0",
-    "source-map-support": "^0.4.2",
-    "temp": "^0.8.3"
+    "temp": "^0.8.3",
+    "uuid": "^2.0.2"
   }
 }

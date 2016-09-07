@@ -7,4 +7,8 @@ gulp.task('default', function() {
 		.pipe(gulp.dest('build/app/views'));
 	gulp.src('src/app/bin/**/*')
 		.pipe(gulp.dest('build/app/bin'));
+	gulp.src('src/tests/**/*.cpp')
+		.pipe(gulp.dest('build/tests'));
+	gulp.src('src/tests/**/*.txt')
+		.pipe(gulp.dest('build/tests'));
 });

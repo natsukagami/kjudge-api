@@ -2,7 +2,8 @@
 // Source: https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/2c5c3520d341526c54ca64ca3245d2569dce1d6e/fs-extra/fs-extra.d.ts
 declare module "fs-extra" {
     export * from "fs";
-
+    import { Stats } from "fs";
+    import Events = require('events');
 	export function copy(src: string, dest: string, callback?: (err: Error) => void): void;
 	export function copy(src: string, dest: string, filter: CopyFilter, callback?: (err: Error) => void): void;
 	export function copy(src: string, dest: string, options: CopyOptions, callback?: (err: Error) => void): void;
@@ -39,6 +40,20 @@ declare module "fs-extra" {
 
 	export function remove(dir: string, callback?: (err: Error) => void): void;
 	export function removeSync(dir: string): void;
+
+  export interface WalkerInterface extends Events.EventEmitter {
+    read(): {
+      path: string,
+      stats: Stats
+    };
+  }
+
+  export function walk(dir: string, streamOptions?: {
+    queueMethod?: string,
+    pathSorter?: (a: string, b: string) => number,
+    fs?: any,
+    filter?: (item: any, index?: number, arr?: Array<any>) => boolean
+  }): WalkerInterface;
 
 	export function writeJson(file: string, object: any, callback?: (err: Error) => void): void;
 	export function writeJson(file: string, object: any, options?: OpenOptions, callback?: (err: Error) => void): void;

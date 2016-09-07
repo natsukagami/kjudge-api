@@ -37,6 +37,5 @@ jspm_packages
 .node_repl_history
 
 /node_modules/
-/build/
 /.vscode/.browse.VC.db*
 /src/app/bin/config.json

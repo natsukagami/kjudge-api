@@ -5,11 +5,15 @@
 		"mocha": "registry:dt/mocha#2.2.5+20160720003353",
 		"morgan": "registry:dt/morgan#1.7.0+20160524142355",
 		"node": "registry:dt/node#6.0.0+20160818175514",
-		"temp": "registry:dt/temp#0.8.3+20160105142454"
+		"temp": "registry:dt/temp#0.8.3+20160105142454",
+		"uuid": "registry:dt/uuid#3.3.0+20160728152600"
 	},
 	"dependencies": {
 		"bluebird": "registry:npm/bluebird#3.4.1+20160811213708",
 		"body-parser": "registry:npm/body-parser#1.15.2+20160815132839",
+		"chai": "registry:npm/chai#3.5.0+20160723033700",
+		"chai-as-promised": "registry:npm/chai-as-promised#5.1.0+20160310030142",
+		"debug": "registry:npm/debug#2.0.0+20160723033700",
 		"express": "registry:npm/express#4.14.0+20160815112707"
 	}
 }
