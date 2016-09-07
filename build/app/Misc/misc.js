@@ -3,6 +3,7 @@ const Promise = require('bluebird');
 const fs = require('fs-extra');
 const debug = require('debug');
 const temp = require('temp');
+const path = require('path');
 const FSDebug = debug('kjudge:fs');
 function copyAsync(source, dest) {
     return new Promise((resolve, reject) => {
@@ -17,23 +18,41 @@ function copyAsync(source, dest) {
     });
 }
 exports.copyAsync = copyAsync;
-function walkAsync(dir) {
-    return new Promise((resolve, reject) => {
-        let items = [];
-        let walker = fs.walk(dir)
-            .on('readable', () => {
-            let item;
-            while ((item = walker.read())) {
-                if (item.stats.isFile())
-                    items.push(item.path);
-            }
-        })
-            .on('error', (err, item) => {
-            reject(new Error(err.message + ' on ' + item.path));
-        })
-            .on('end', () => {
-            resolve(items);
+function walkAsync(dir, prefix = null) {
+    function statAsync(path) {
+        return new Promise((resolve, reject) => {
+            fs.stat(path, (err, stats) => {
+                if (err)
+                    return reject(err);
+                resolve(stats);
+            });
         });
+    }
+    prefix = (prefix ? prefix : dir);
+    return new Promise((resolve, reject) => {
+        fs.readdir(dir, (err, files) => {
+            if (err)
+                return reject(err);
+            resolve(Promise.all(files.map((file) => {
+                return statAsync(path.join(dir, file)).then(function (stats) {
+                    if (stats.isFile())
+                        return Promise.resolve(path.join(prefix, file));
+                    return walkAsync(path.join(dir, file), path.join(prefix, file));
+                });
+            })));
+        });
+    }).then((files) => {
+        let ret = [];
+        function flatten(arr) {
+            arr.forEach((file) => {
+                if (typeof file === 'string')
+                    ret.push(file);
+                else
+                    flatten(file);
+            });
+        }
+        flatten(files);
+        return ret;
     });
 }
 exports.walkAsync = walkAsync;

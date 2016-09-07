@@ -3,6 +3,7 @@ import Promise = require('bluebird');
 import fs = require('fs-extra');
 import debug = require('debug');
 import temp = require('temp');
+import path = require('path');
 
 // Helper commands
 
@@ -31,24 +32,38 @@ export function copyAsync(source: string, dest: string): Promise<void> {
  * @param  {string}  dir The folder to be walked
  * @return {Promise}     List of files
  */
-export function walkAsync(dir: string): Promise<Array<string> > {
-	return new Promise<Array<string> >((resolve, reject) => {
-		let items: Array<string> = [];
-		let walker = fs.walk(dir)
-			.on('readable', () => {
-				let item: { path: string, stats: fs.Stats };
-				while ((item = walker.read())) {
-					if (item.stats.isFile()) items.push(item.path);
-				}
-			})
-			.on('error', (err, item) => {
-				reject(new Error(err.message + ' on ' + item.path));
-			})
-			.on('end', () => {
-				resolve(items);
-			});
-	});
-}
+export function walkAsync(dir: string, prefix: string = null): Promise<Array<string> > {
+     function statAsync(path: string): Promise<fs.Stats> {
+         return new Promise<fs.Stats>((resolve, reject) => {
+             fs.stat(path, (err, stats) => {
+                 if (err) return reject(err);
+                 resolve(stats);
+             })
+         })
+     }
+     prefix = (prefix ? prefix : dir);
+     return new Promise<any>((resolve, reject) => {
+       fs.readdir(dir, (err, files) => {
+           if (err) return reject(err);
+           resolve(Promise.all(files.map((file) => {
+               return statAsync(path.join(dir, file)).then(function(stats): Promise<string | Array<string>> {
+                   if (stats.isFile()) return Promise.resolve(path.join(prefix, file));
+                   return walkAsync(path.join(dir, file), path.join(prefix, file));
+               })
+           })));
+       });
+     }).then((files: Array<string | Array<string>>) => {
+         let ret = [];
+         function flatten(arr: Array<string | Array<string>>) {
+             arr.forEach((file) => {
+                 if (typeof file === 'string') ret.push(file);
+                 else flatten(file);
+             });
+         }
+         flatten(files);
+         return ret;
+     });
+ }
 
 /**
  * Reads a file and returns its content, parsed with utf-8 encoding

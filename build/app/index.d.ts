@@ -3,12 +3,7 @@ import { Submission } from './Submission/submission';
 import { Problem } from './Problem/problem';
 import { Test } from './Problem/test';
 import { cQueue } from './Queue/queue';
-declare var _default: ({
-  // Settings
-  queueConcurrency = 4,
-  isolatePath = '/var/lib/isolate/',
-  problemsPath = './problems'
-}: {
+declare var _default: ({queueConcurrency, isolatePath, problemsPath}: {
     queueConcurrency?: number;
     isolatePath?: string;
     problemsPath?: string;
