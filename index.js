@@ -1,1 +1,1 @@
-module.exports = require('./build/app/models/models.js')
+module.exports = require('./build/index.js')

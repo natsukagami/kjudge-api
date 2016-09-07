@@ -1,6 +1,6 @@
 {
   "name": "kjudge-api",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A pluggable API for automated judging systems.",
   "main": "build/index.js",
   "typings": "build/index",
