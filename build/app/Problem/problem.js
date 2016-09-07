@@ -11,7 +11,7 @@ class Problem {
         this.grader = grader;
         this.tests = [];
         this.scorer = scorer_1.getScorer(this.scorerType);
-        this.folder = path.join(Problem.Path, this.name.toLowerCase());
+        this.folder = path.join(Problem.Path, this.name);
     }
     pushTest(test) {
         test.inputFile = path.join(this.folder, test.inputFile);

@@ -33,7 +33,7 @@ export class Problem implements ProblemInterface {
 	folder: string;
 	constructor(public name: string, public submitType: SubmitType, public scorerType: ScorerType, public compare: string = "", public header: string = "", public grader: string = "") {
 		this.scorer = getScorer(this.scorerType);
-		this.folder = path.join(Problem.Path, this.name.toLowerCase());
+		this.folder = path.join(Problem.Path, this.name);
 	}
 	/** Add a test */
 	pushTest(test: Test): void {
