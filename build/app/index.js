@@ -4,8 +4,9 @@ const problem_1 = require('./Problem/problem');
 const test_1 = require('./Problem/test');
 const queue_1 = require('./Queue/queue');
 const sandbox_1 = require('./Queue/sandbox');
+const misc_1 = require('./Misc/misc');
 module.exports = ({ queueConcurrency = 4, isolatePath = '/var/lib/isolate/', problemsPath = './problems' }) => {
-    queue_1.cQueue.concurrency = queueConcurrency;
+    misc_1.FSQueue.concurrency = queue_1.cQueue.concurrency = queueConcurrency;
     sandbox_1.IsolateSandbox.Path = isolatePath;
     problem_1.Problem.Path = problemsPath;
     return {

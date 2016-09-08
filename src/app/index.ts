@@ -4,6 +4,7 @@ import { Problem } from './Problem/problem';
 import { Test } from './Problem/test';
 import { cQueue, Queue } from './Queue/queue';
 import { IsolateSandbox } from './Queue/sandbox';
+import { FSQueue } from './Misc/misc';
 
 export = ({
   // Settings
@@ -15,7 +16,7 @@ export = ({
   isolatePath?: string,
   problemsPath?: string
 }) => {
-  cQueue.concurrency = queueConcurrency;
+  FSQueue.concurrency = cQueue.concurrency = queueConcurrency;
   IsolateSandbox.Path = isolatePath;
   Problem.Path = problemsPath;
   return {
