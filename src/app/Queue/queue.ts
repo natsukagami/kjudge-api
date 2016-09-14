@@ -7,10 +7,49 @@ import Events = require('events');
 
 type QueueItem = [JobInterface, Function];
 
+class PriorityArray<T> {
+	private arr: Array<[T, number]> = [];
+	length: number = 0;
+	private swap(x: number, y: number): void {
+		let t = this.arr[x];
+		this.arr[x] = this.arr[y];
+		this.arr[y] = t;
+	}
+	push(item: T, priority: number = 0): void {
+		let _raise = (index: number) => {
+			if (index === 1) return;
+			if (this.arr[(index >> 1) - 1][1] < this.arr[index - 1][1]) {
+				this.swap(index - 1, (index >> 1) - 1);
+				_raise((index >> 1));
+			}
+		}
+		++this.length;
+		this.arr.push([item, priority]);
+		_raise(this.arr.length);
+	}
+	shift(): T {
+		--this.length;
+		let item = this.arr.shift();
+		let _dive = (index: number) => {
+			if (index * 2 > this.arr.length) return;
+			let x = (index * 2 + 1 > this.arr.length || this.arr[index * 2 - 1][1] > this.arr[index * 2][1] ? index * 2 : index * 2 + 1);
+			if (this.arr[index - 1][1] < this.arr[x - 1][1]) {
+				this.swap(index - 1, x - 1);
+				_dive(x);
+			}
+		}
+		if (this.arr.length) {
+			this.arr.unshift(this.arr.pop());
+			_dive(1);
+		}
+		return item[0];
+	}
+}
+
 // TODO: Add cQueue.concurrency to Settings
 
 export class cQueue {
-	private queue: Array<QueueItem> = [];
+	private queue: PriorityArray<QueueItem> = new PriorityArray<QueueItem>();
 	private current: Array<string> = [];
 	public Dispatcher: Events.EventEmitter = new Events.EventEmitter();
 	private Debug: debug.Debugger;
@@ -21,7 +60,7 @@ export class cQueue {
 		this.Dispatcher.emit('ready');
 		this.Debug('Queue Ready');
 	}
-	private makePromise(j: JobInterface): Promise<ExecutionResult> {
+	private makePromise(j: JobInterface, priority: number): Promise<ExecutionResult> {
 		this.Dispatcher.emit('job-queued', j);
 		this.Debug('Job #' + j.id + ' queued');
 		return new Promise<ExecutionResult>((resolve, reject) => {
@@ -37,7 +76,7 @@ export class cQueue {
 					return res;
 				}));
 			}
-			this.queue.push([j, func]);
+			this.queue.push([j, func], priority);
 		});
 	}
 	private runJobs(): void {
@@ -55,8 +94,8 @@ export class cQueue {
 	 * @param  {JobInterface}             j The job to be pushed
 	 * @return {Promise<ExecutionResult>}   Promise of the job's completion
 	 */
-	push(j: JobInterface): Promise<ExecutionResult> {
-		return this.makePromise(j);
+	push(j: JobInterface, priority: number = 0): Promise<ExecutionResult> {
+		return this.makePromise(j, priority);
 	}
 }
 

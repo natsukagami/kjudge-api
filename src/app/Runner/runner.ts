@@ -14,10 +14,10 @@ import temp = require('temp');
 import path = require('path');
 import fs = require('fs-extra');
 
-function enqueueProcess(name: string, command: string, cwd: string = ""): Promise<CompletedProcess> {
+function enqueueProcess(name: string, command: string, cwd: string = "", priority: number = 0): Promise<CompletedProcess> {
 	let s = new Job.DirectBox(cwd, command);
 	let j = new Job.Job(name, s);
-	return Queue.push(j).then((res) => { return res.process; });
+	return Queue.push(j, priority).then((res) => { return res.process; });
 }
 
 export interface RunnerInterface {
@@ -31,13 +31,13 @@ export class Runner implements RunnerInterface {
 	public problem: ProblemInterface;
 	private score_by_diff(output: string, answer: string): Promise<number> {
 		return enqueueProcess('Scoring test ' + this.test.id.toString() + ' for submission #' + this.submission.id.toString(),
-													shellEscape(['diff', '-w', '-q', output, answer]) + ' >/dev/null 2>/dev/null').then((proc) => {
+													shellEscape(['diff', '-w', '-q', output, answer]) + ' >/dev/null 2>/dev/null', '', 20).then((proc) => {
 			return (proc.returnCode === 0 ? 1 : 0);
 		});
 	}
 	private score_by_compare(input: string, output: string, answer: string, dir: string): Promise<[number, string]> {
 		return enqueueProcess('Scoring test ' + this.test.id.toString() + ' for submission #' + this.submission.id.toString(),
-													shellEscape(['./compare', input, output, answer]), dir).then((proc) => {
+													shellEscape(['./compare', input, output, answer]), dir, 20).then((proc) => {
 			/* This should be a number between 0 and 1 */
 			let x: number = Number(proc.stdout.replace(/\n/g, '').replace(/\r/g, ''));
 			let y: [number, string] = [x, proc.stderr.replace(/\n/g, '').replace(/\r/g, '')];

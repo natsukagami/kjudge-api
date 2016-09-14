@@ -10,8 +10,8 @@ export declare class cQueue {
     private Debug;
     static concurrency: number;
     constructor();
-    private makePromise(j);
+    private makePromise(j, priority);
     private runJobs();
-    push(j: JobInterface): Promise<ExecutionResult>;
+    push(j: JobInterface, priority?: number): Promise<ExecutionResult>;
 }
 export declare const Queue: cQueue;

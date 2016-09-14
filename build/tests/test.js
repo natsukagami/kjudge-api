@@ -20,7 +20,7 @@ describe('Overall Test', function () {
         let sub = new kjudge.Submission(1, problem, 'C++', fs.readFileSync('/home/natsukagami/Projects/ttjudge-discord/problems/blacknode/tree.cpp', 'utf-8'));
         return sub.judge().then(() => {
             console.log(sub.result);
-            assert.deepEqual(sub.score[0], 0);
+            assert.deepEqual(sub.score[0], 100);
         });
     });
 });

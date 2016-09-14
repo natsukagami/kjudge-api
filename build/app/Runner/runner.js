@@ -7,10 +7,10 @@ const queue_1 = require('../Queue/queue');
 const shellEscape = require('shell-escape');
 const path = require('path');
 const fs = require('fs-extra');
-function enqueueProcess(name, command, cwd = "") {
+function enqueueProcess(name, command, cwd = "", priority = 0) {
     let s = new Job.DirectBox(cwd, command);
     let j = new Job.Job(name, s);
-    return queue_1.Queue.push(j).then((res) => { return res.process; });
+    return queue_1.Queue.push(j, priority).then((res) => { return res.process; });
 }
 class Runner {
     constructor(submission, test) {
@@ -19,12 +19,12 @@ class Runner {
         this.problem = this.submission.problem;
     }
     score_by_diff(output, answer) {
-        return enqueueProcess('Scoring test ' + this.test.id.toString() + ' for submission #' + this.submission.id.toString(), shellEscape(['diff', '-w', '-q', output, answer]) + ' >/dev/null 2>/dev/null').then((proc) => {
+        return enqueueProcess('Scoring test ' + this.test.id.toString() + ' for submission #' + this.submission.id.toString(), shellEscape(['diff', '-w', '-q', output, answer]) + ' >/dev/null 2>/dev/null', '', 20).then((proc) => {
             return (proc.returnCode === 0 ? 1 : 0);
         });
     }
     score_by_compare(input, output, answer, dir) {
-        return enqueueProcess('Scoring test ' + this.test.id.toString() + ' for submission #' + this.submission.id.toString(), shellEscape(['./compare', input, output, answer]), dir).then((proc) => {
+        return enqueueProcess('Scoring test ' + this.test.id.toString() + ' for submission #' + this.submission.id.toString(), shellEscape(['./compare', input, output, answer]), dir, 20).then((proc) => {
             let x = Number(proc.stdout.replace(/\n/g, '').replace(/\r/g, ''));
             let y = [x, proc.stderr.replace(/\n/g, '').replace(/\r/g, '')];
             return y;

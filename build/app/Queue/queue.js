@@ -2,9 +2,51 @@
 const debug = require('debug');
 const Promise = require('bluebird');
 const Events = require('events');
+class PriorityArray {
+    constructor() {
+        this.arr = [];
+        this.length = 0;
+    }
+    swap(x, y) {
+        let t = this.arr[x];
+        this.arr[x] = this.arr[y];
+        this.arr[y] = t;
+    }
+    push(item, priority = 0) {
+        let _raise = (index) => {
+            if (index === 1)
+                return;
+            if (this.arr[(index >> 1) - 1][1] < this.arr[index - 1][1]) {
+                this.swap(index - 1, (index >> 1) - 1);
+                _raise((index >> 1));
+            }
+        };
+        ++this.length;
+        this.arr.push([item, priority]);
+        _raise(this.arr.length);
+    }
+    shift() {
+        --this.length;
+        let item = this.arr.shift();
+        let _dive = (index) => {
+            if (index * 2 > this.arr.length)
+                return;
+            let x = (index * 2 + 1 > this.arr.length || this.arr[index * 2 - 1][1] > this.arr[index * 2][1] ? index * 2 : index * 2 + 1);
+            if (this.arr[index - 1][1] < this.arr[x - 1][1]) {
+                this.swap(index - 1, x - 1);
+                _dive(x);
+            }
+        };
+        if (this.arr.length) {
+            this.arr.unshift(this.arr.pop());
+            _dive(1);
+        }
+        return item[0];
+    }
+}
 class cQueue {
     constructor() {
-        this.queue = [];
+        this.queue = new PriorityArray();
         this.current = [];
         this.Dispatcher = new Events.EventEmitter();
         this.runJobs();
@@ -12,7 +54,7 @@ class cQueue {
         this.Dispatcher.emit('ready');
         this.Debug('Queue Ready');
     }
-    makePromise(j) {
+    makePromise(j, priority) {
         this.Dispatcher.emit('job-queued', j);
         this.Debug('Job #' + j.id + ' queued');
         return new Promise((resolve, reject) => {
@@ -28,7 +70,7 @@ class cQueue {
                     return res;
                 }));
             };
-            this.queue.push([j, func]);
+            this.queue.push([j, func], priority);
         });
     }
     runJobs() {
@@ -42,8 +84,8 @@ class cQueue {
         }
         Promise.delay(100).then(() => { this.runJobs(); });
     }
-    push(j) {
-        return this.makePromise(j);
+    push(j, priority = 0) {
+        return this.makePromise(j, priority);
     }
 }
 exports.cQueue = cQueue;
